@@ -32,18 +32,10 @@ export async function POST(request: NextRequest) {
   const { content } = await request.json()
   lastContent = content
   
-  // Create a copy of clients to avoid modification during iteration
   Array.from(clients).forEach((client) => {
     try {
-      // Only send to active clients
-      if (client.desiredSize !== null) {
-        client.enqueue(`data: ${JSON.stringify({ content })}\n\n`)
-      } else {
-        // Remove closed clients
-        clients.delete(client)
-      }
+      client.enqueue(`data: ${JSON.stringify({ content })}\n\n`)
     } catch (error) {
-      // Remove client if we encounter any errors (like closed connections)
       console.error('Error sending content to client:', {
         error,
         client

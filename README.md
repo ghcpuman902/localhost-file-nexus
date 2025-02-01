@@ -21,26 +21,29 @@ A lightweight local network file sharing and text sync hub, perfect for cross-pl
 1. Clone the repository and install dependencies:
 
 ```bash
-npm install
+pnpm install
 # or
 yarn install
 # or
-pnpm install
+npm install
 ```
 
-2. Configure environment variables:
-Create a `.env` file in the root directory:
-```
-BASE_URL=http://localhost:3000
-```
-
-3. Run the development server:
+2.A. Run the development server:
 ```bash
+pnpm run dev
+# or
+yarn run dev
+# or
 npm run dev
+```
+
+2.B. Alternatively, build and start the production server:
+```bash
+pnpm run build && pnpm run start
 # or
-yarn dev
+yarn run build && yarn run start
 # or
-pnpm dev
+npm run build && npm run start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
@@ -99,24 +102,31 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
    ```
    http://[YOUR-LOCAL-IP]:3000
    ```
+   you can see this during development in the terminal
 
 ## Security Note
 
 This app is designed for local network use only. Do not expose it to the internet without implementing proper security measures.
 
-------------------
-additional info:
+## GitHub Discoverability
 
-remember to change file limit in next.config.ts
-```
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '1gb',
-    },
-  },
-```
+**Search Keywords**:  
+🔍 Local network file sharing • Cross-platform collaboration tool • LAN clipboard sync • Intranet file transfer • Real-time text synchronization • Localhost file exchange • Secure LAN sharing • Device-to-device file transfer • Terminal output sharing • Troubleshooting file share
 
-and update the base url in .env
-```
-BASE_URL=http://localhost:3000
-```
+**Key Phrases**:  
+- "Share files between Windows macOS Linux on same network"  
+- "Sync clipboard content across devices locally"  
+- "Local network file sharing without internet"  
+- "Real-time terminal output sharing tool"  
+- "Cross-platform file transfer over WiFi"  
+- "Secure intranet file sharing solution"  
+- "Collaborative troubleshooting file exchange"  
+- "Lightweight LAN file sharing web app"  
+- "Self-hosted alternative to WeTransfer for local network"  
+- "Open source local file sync hub"
+
+**Technology Tags**:  
+Next.js file sharing • Tailwind CSS UI • shadcn/ui components • SSE real-time updates • Node.js file system API • Local network web app • MIT licensed file share • Geist font interface
+
+**Alternative Naming**:  
+LAN File Bridge • Intranet Nexus • LocalSync Hub • Neighborhood File Share • Proximity File Transfer • Nearby File Nexus • Home Network Sync
