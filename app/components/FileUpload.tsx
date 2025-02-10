@@ -143,13 +143,13 @@ export function FileUpload({
                 return (
                   <li key={index} className="flex items-center justify-between h-8 py-1 px-2 rounded-md bg-muted">
                     <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
-                      <FileIcon className="w-4 h-4 flex-shrink-0" />
+                      <FileIcon className="w-4 h-4 shrink-0" />
                       <div className="flex-1 flex items-center min-w-0">
                         <span className="text-sm truncate">{name}</span>
                         <span className="text-sm text-muted-foreground flex-1 text-left">.{ext}</span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 flex-shrink-0">
+                    <div className="flex items-center space-x-2 shrink-0">
                       {fileWithStatus.status === "uploading" && (
                         <Progress value={fileWithStatus.progress} className="w-20 h-2" />
                       )}

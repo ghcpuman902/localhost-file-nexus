@@ -221,7 +221,7 @@ export function SyncedTextarea() {
             onClick={handleCopy} 
             variant="outline" 
             title="Copy entire content" 
-            className={`transition-all duration-500 ${isCopied ? 'bg-gradient-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
+            className={`transition-all duration-500 ${isCopied ? 'bg-linear-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
           >
             {isCopied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             Copy All
@@ -230,7 +230,7 @@ export function SyncedTextarea() {
             onClick={handleCopyDiff} 
             variant="outline" 
             title="Copy only the latest changes" 
-            className={`transition-all duration-500 ${isCopied ? 'bg-gradient-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
+            className={`transition-all duration-500 ${isCopied ? 'bg-linear-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
           >
             {isCopied ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
             Copy Diff

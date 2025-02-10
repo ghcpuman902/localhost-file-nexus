@@ -85,7 +85,7 @@ export default async function Page({
               Back to file browser
             </Link>
           </div>
-          <div className="bg-card rounded-lg shadow p-6">
+          <div className="bg-card rounded-lg shadow-sm p-6">
             <h1 className="text-2xl font-bold mb-4">{decodedPath[decodedPath.length - 1]}</h1>
             <div className="space-y-4">
               <div className="text-muted-foreground">
@@ -137,7 +137,7 @@ export default async function Page({
 
     return (
       <div className="p-4 space-y-6">
-        <div className="bg-card rounded-lg shadow overflow-hidden">
+        <div className="bg-card rounded-lg shadow-sm overflow-hidden">
           <div className="border-b bg-muted/50">
             <div className="p-4">
               <nav className="flex items-center gap-2 text-sm">

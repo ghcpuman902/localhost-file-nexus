@@ -74,12 +74,12 @@ export function FileBrowser() {
           <p className="text-sm text-muted-foreground mt-2">Scanning local upload directory</p>
         </div>
       ) : error ? (
-        <div className="bg-destructive/10 text-destructive p-6 rounded-lg shadow-sm">
+        <div className="bg-destructive/10 text-destructive p-6 rounded-lg shadow-xs">
           <h2 className="text-lg font-semibold mb-2">Error Loading Files</h2>
           <p>Failed to read uploads directory. Please ensure the uploads folder exists and has proper permissions.</p>
         </div>
       ) : (
-        <div className="bg-card rounded-lg shadow-sm">
+        <div className="bg-card rounded-lg shadow-xs">
           {files.length === 0 ? (
             <div className="p-6 text-center text-muted-foreground">
               <p>No files uploaded yet</p>
