@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Copy, FileDiff } from "lucide-react"
+import { Copy, FileDiff, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 
@@ -11,6 +11,7 @@ export function SyncedTextarea() {
   const [latestDiff, setLatestDiff] = useState("")
   const [initialContent, setInitialContent] = useState(true)
   const [localStorageLoaded, setLocalStorageLoaded] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
   // Debounce timeout ref for API calls.
   const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -118,7 +119,6 @@ export function SyncedTextarea() {
           copySucceeded = true
         } catch (err) {
           console.warn("Clipboard write failed, trying fallback:", err)
-          // Fall back below.
         }
       }
 
@@ -142,6 +142,11 @@ export function SyncedTextarea() {
         title: "Copied!",
         description: "Content copied to clipboard",
       })
+
+      if (copySucceeded) {
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 2000)
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -154,8 +159,6 @@ export function SyncedTextarea() {
   // Copy diff using same fallback approach.
   const handleCopyDiff = async () => {
     try {
-      // When initially loaded (or default text exists) copy the entire content;
-      // otherwise, copy only the latest diff.
       const diffContent = initialContent ? syncedContent.trim() : latestDiff
       if (!diffContent) {
         toast({
@@ -173,7 +176,6 @@ export function SyncedTextarea() {
           copySucceeded = true
         } catch (err) {
           console.warn("Clipboard write failed, trying fallback:", err)
-          // Fallback method uses execCommand below.
         }
       }
 
@@ -197,6 +199,11 @@ export function SyncedTextarea() {
         title: "Copied!",
         description: "Latest update copied to clipboard",
       })
+
+      if (copySucceeded) {
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 2000)
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -210,12 +217,22 @@ export function SyncedTextarea() {
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
         <div className="flex gap-2">
-          <Button onClick={handleCopy} variant="outline" title="Copy entire content">
-            <Copy className="h-4 w-4" />
+          <Button 
+            onClick={handleCopy} 
+            variant="outline" 
+            title="Copy entire content" 
+            className={`transition-all duration-500 ${isCopied ? 'bg-gradient-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
+          >
+            {isCopied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             Copy All
           </Button>
-          <Button onClick={handleCopyDiff} variant="outline" title="Copy only the latest changes">
-            <FileDiff className="h-4 w-4" />
+          <Button 
+            onClick={handleCopyDiff} 
+            variant="outline" 
+            title="Copy only the latest changes" 
+            className={`transition-all duration-500 ${isCopied ? 'bg-gradient-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
+          >
+            {isCopied ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
             Copy Diff
           </Button>
         </div>
