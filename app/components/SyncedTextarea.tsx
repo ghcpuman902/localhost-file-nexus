@@ -11,7 +11,7 @@ export function SyncedTextarea() {
   const [latestDiff, setLatestDiff] = useState("")
   const [initialContent, setInitialContent] = useState(true)
   const [localStorageLoaded, setLocalStorageLoaded] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
+  const [copyStatus, setCopyStatus] = useState(0) // 0: none, 1: copy all, 2: copy diff
 
   // Debounce timeout ref for API calls.
   const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -144,8 +144,8 @@ export function SyncedTextarea() {
       })
 
       if (copySucceeded) {
-        setIsCopied(true)
-        setTimeout(() => setIsCopied(false), 2000)
+        setCopyStatus(1) // Set status to 1 for "Copy All"
+        setTimeout(() => setCopyStatus(0), 2000) // Reset after 2 seconds
       }
     } catch (error) {
       toast({
@@ -201,8 +201,8 @@ export function SyncedTextarea() {
       })
 
       if (copySucceeded) {
-        setIsCopied(true)
-        setTimeout(() => setIsCopied(false), 2000)
+        setCopyStatus(2) // Set status to 2 for "Copy Diff"
+        setTimeout(() => setCopyStatus(0), 2000) // Reset after 2 seconds
       }
     } catch (error) {
       toast({
@@ -221,18 +221,18 @@ export function SyncedTextarea() {
             onClick={handleCopy} 
             variant="outline" 
             title="Copy entire content" 
-            className={`transition-all duration-500 ${isCopied ? 'bg-linear-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
+            className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 1 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
           >
-            {isCopied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            {copyStatus === 1 ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             Copy All
           </Button>
           <Button 
             onClick={handleCopyDiff} 
             variant="outline" 
             title="Copy only the latest changes" 
-            className={`transition-all duration-500 ${isCopied ? 'bg-linear-to-r from-indigo-500 to-teal-400 animate-[rainbow_1.5s_ease_infinite]' : ''}`}
+            className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 2 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
           >
-            {isCopied ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
+            {copyStatus === 2 ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
             Copy Diff
           </Button>
         </div>
@@ -240,7 +240,7 @@ export function SyncedTextarea() {
       <textarea
         value={syncedContent}
         onChange={(e) => handleSync(e.target.value)}
-        className="w-full h-[70vh] p-2 border rounded font-mono text-sm"
+        className="w-full h-[70vh] p-2 border rounded-lg font-mono text-sm"
         placeholder="Paste terminal outputs, commands, or any text here to sync across devices..."
       />
     </div>

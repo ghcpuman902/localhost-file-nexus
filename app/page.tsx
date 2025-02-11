@@ -1,30 +1,29 @@
 import { FileBrowser } from "@/app/components/FileBrowser";
 import { SyncedTextarea } from "@/app/components/SyncedTextarea";
 
-export default function Home() {
+export default async function Home() {
+
   return (
-    <div className="min-h-screen p-8">
-      <main className="flex-1 space-y-12">
-        <section>
+      <main className="flex-1 flex flex-col lg:flex-row lg:space-x-8 space-y-12 lg:space-y-0">
+        <section className="lg:flex-1">
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-2">File Exchange</h2>
             <p className="text-sm text-muted-foreground">
-              Share files between devices on your local network. Access this page from other devices using your LAN IP address.
+              Web interface for browsing and uploading files to the host machine&apos;s <code className="bg-muted px-1 rounded">/public/uploads</code> folder.
             </p>
           </div>
           <FileBrowser />
         </section>
 
-        <section>
+        <section className="lg:flex-1">
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-2">Shared Clipboard</h2>
             <p className="text-sm text-muted-foreground">
-              Sync text, commands, and outputs between devices in real-time. Perfect for sharing terminal outputs or configuration snippets.
+              Sync text and commands in real-time to aid in debugging. Useful for terminal commands and code snippets.
             </p>
           </div>
           <SyncedTextarea />
         </section>
       </main>
-    </div>
   );
 }

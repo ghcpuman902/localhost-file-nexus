@@ -9,25 +9,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
-
-interface FileEntry {
-  name: string
-  isDirectory: boolean
-  size: number
-  path: string
-}
-
-const isImageFile = (filename: string) => {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
-  return imageExtensions.some(ext => filename.toLowerCase().endsWith(ext))
-}
-
-const splitFilename = (filename: string) => {
-  const parts = filename.split(".")
-  const ext = parts.pop() || ""
-  const name = parts.join(".")
-  return { name, ext }
-}
+import { FileEntry, isImageFile, splitFilename, shouldShowFile, formatFileSize } from "@/lib/file-utils"
 
 export default async function Page({ 
   params 
@@ -78,7 +60,7 @@ export default async function Page({
     if (!isDirectory) {
       const fileUrl = `/uploads/${encodedPath.join("/")}`
       return (
-        <div className="p-4 space-y-6">
+        <>
           <div className="mb-4">
             <Link href="/browse" className="text-blue-500 hover:underline flex items-center gap-2">
               <FileHeart className="w-4 h-4" />
@@ -89,7 +71,7 @@ export default async function Page({
             <h1 className="text-2xl font-bold mb-4">{decodedPath[decodedPath.length - 1]}</h1>
             <div className="space-y-4">
               <div className="text-muted-foreground">
-                <p>Size: {(stats.size / 1024).toFixed(2)} KB</p>
+                <p>Size: {formatFileSize(stats.size)}</p>
                 <p>Last modified: {stats.mtime.toLocaleString()}</p>
               </div>
               <div className="flex gap-4">
@@ -112,22 +94,24 @@ export default async function Page({
               </div>
             </div>
           </div>
-        </div>
+        </>
       )
     }
 
     const entries = await readdir(currentPath, { withFileTypes: true })
     const files: FileEntry[] = await Promise.all(
-      entries.map(async (entry) => {
-        const fullPath = join(currentPath, entry.name)
-        const stats = await stat(fullPath)
-        return {
-          name: entry.name,
-          isDirectory: entry.isDirectory(),
-          size: stats.size,
-          path: [...encodedPath, encodeURIComponent(entry.name)].join("/")
-        }
-      })
+      entries
+        .filter(entry => shouldShowFile(entry.name))
+        .map(async (entry) => {
+          const fullPath = join(currentPath, entry.name)
+          const stats = await stat(fullPath)
+          return {
+            name: entry.name,
+            isDirectory: entry.isDirectory(),
+            size: stats.size,
+            path: [...encodedPath, encodeURIComponent(entry.name)].join("/")
+          }
+        })
     )
 
     files.sort((a, b) => a.isDirectory === b.isDirectory 
@@ -136,8 +120,8 @@ export default async function Page({
     )
 
     return (
-      <div className="p-4 space-y-6">
-        <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+      <div className="space-y-6">
+        <div className="bg-card rounded-lg shadow-sm overflow-hidden dark:border-1 dark:border-neutral-800">
           <div className="border-b bg-muted/50">
             <div className="p-4">
               <nav className="flex items-center gap-2 text-sm">
@@ -243,6 +227,8 @@ export default async function Page({
                       <Image
                         src={`/uploads/${file.path}`}
                         alt={file.name}
+                        width={320}
+                        height={240}
                         className="rounded-md max-h-48 object-contain mx-auto"
                       />
                     </HoverCardContent>
@@ -262,7 +248,7 @@ export default async function Page({
                 )}
                 {!file.isDirectory && (
                   <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    {(file.size / 1024).toFixed(2)} KB
+                    {formatFileSize(file.size)}
                   </span>
                 )}
               </Link>

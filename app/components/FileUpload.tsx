@@ -122,11 +122,11 @@ export function FileUpload({
         )}
       >
         <input {...getInputProps()} />
-        <Button variant="secondary" className="absolute top-2 left-2 z-10" onClick={open}>
+        <Button variant="secondary" className="absolute top-2 left-2 z-10 bg-secondary hover:bg-secondary/60 hover:cursor-pointer" onClick={open}>
           Select Files
         </Button>
         {files.length > 0 && !isUploading && (
-          <Button variant="default" className="absolute top-2 right-2 z-10" onClick={uploadFiles}>
+          <Button className="absolute top-2 right-2 z-10 bg-primary hover:bg-primary/80 hover:cursor-pointer" onClick={uploadFiles}>
             Upload Files
           </Button>
         )}
