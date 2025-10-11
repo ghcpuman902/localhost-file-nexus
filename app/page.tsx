@@ -4,7 +4,7 @@ import { SyncedTextarea } from "@/app/components/SyncedTextarea";
 export default async function Home() {
 
   return (
-      <main className="flex-1 flex flex-col lg:flex-row lg:space-x-8 space-y-12 lg:space-y-0">
+      <div className="flex-1 flex flex-col lg:flex-row lg:space-x-8 space-y-12 lg:space-y-0">
         <section className="lg:flex-1">
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-2">File Exchange</h2>
@@ -24,6 +24,6 @@ export default async function Home() {
           </div>
           <SyncedTextarea />
         </section>
-      </main>
+      </div>
   );
 }

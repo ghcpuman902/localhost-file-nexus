@@ -40,3 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+#igonore all upload files except template ones
+/public/uploads/*
+!public/uploads/hover_on_me.jpg
+!public/uploads/next.svg
+!public/uploads/test folder/test_image_2.jpg

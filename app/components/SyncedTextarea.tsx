@@ -2,11 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Copy, FileDiff, CheckCircle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@/components/ui/input-group"
 
 export function SyncedTextarea() {
-  const { toast } = useToast()
   const [syncedContent, setSyncedContent] = useState("")
   const [latestDiff, setLatestDiff] = useState("")
   const [initialContent, setInitialContent] = useState(true)
@@ -104,10 +110,8 @@ export function SyncedTextarea() {
     try {
       const contentToCopy = syncedContent.trim()
       if (!contentToCopy) {
-        toast({
-          title: "Nothing to copy",
+        toast.info("Nothing to copy", {
           description: "The content is empty",
-          variant: "destructive",
         })
         return
       }
@@ -138,8 +142,7 @@ export function SyncedTextarea() {
         document.body.removeChild(textarea)
       }
 
-      toast({
-        title: "Copied!",
+      toast.success("Copied!", {
         description: "Content copied to clipboard",
       })
 
@@ -148,10 +151,8 @@ export function SyncedTextarea() {
         setTimeout(() => setCopyStatus(0), 2000) // Reset after 2 seconds
       }
     } catch (error) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: `Failed to copy content:\n ${JSON.stringify(error, null, 2)}`,
-        variant: "destructive",
       })
     }
   }
@@ -161,10 +162,8 @@ export function SyncedTextarea() {
     try {
       const diffContent = initialContent ? syncedContent.trim() : latestDiff
       if (!diffContent) {
-        toast({
-          title: "Nothing to copy",
+        toast.info("Nothing to copy", {
           description: "No new content to copy",
-          variant: "destructive",
         })
         return
       }
@@ -195,8 +194,7 @@ export function SyncedTextarea() {
         document.body.removeChild(textarea)
       }
 
-      toast({
-        title: "Copied!",
+      toast.success("Copied!", {
         description: "Latest update copied to clipboard",
       })
 
@@ -205,44 +203,42 @@ export function SyncedTextarea() {
         setTimeout(() => setCopyStatus(0), 2000) // Reset after 2 seconds
       }
     } catch (error) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: `Failed to copy content:\n ${JSON.stringify(error, null, 2)}`,
-        variant: "destructive",
       })
     }
   }
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex gap-2">
-          <Button 
-            onClick={handleCopy} 
-            variant="outline" 
-            title="Copy entire content" 
-            className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 1 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
-          >
-            {copyStatus === 1 ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            Copy All
-          </Button>
-          <Button 
-            onClick={handleCopyDiff} 
-            variant="outline" 
-            title="Copy only the latest changes" 
-            className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 2 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
-          >
-            {copyStatus === 2 ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
-            Copy Diff
-          </Button>
-        </div>
-      </div>
-      <textarea
+    <InputGroup
+      className="w-full rounded-lg"
+    >
+      <InputGroupTextarea
         value={syncedContent}
         onChange={(e) => handleSync(e.target.value)}
-        className="w-full h-[70vh] p-2 border rounded-lg font-mono text-sm"
+        className="w-full min-h-[20lh] text-sm"
         placeholder="Paste terminal outputs, commands, or any text here to sync across devices..."
       />
-    </div>
+      <InputGroupAddon align="block-end">
+        <InputGroupButton
+          onClick={handleCopy}
+          variant="outline"
+          title="Copy entire content"
+          className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 1 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
+        >
+          {copyStatus === 1 ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          Copy All
+        </InputGroupButton>
+        <InputGroupButton
+          onClick={handleCopyDiff}
+          variant="outline"
+          title="Copy only the latest changes"
+          className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 2 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
+        >
+          {copyStatus === 2 ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
+          Copy Diff
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   )
 } 
