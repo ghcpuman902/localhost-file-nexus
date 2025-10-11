@@ -211,7 +211,7 @@ export function SyncedTextarea() {
 
   return (
     <InputGroup
-      className="w-full rounded-lg"
+      className="flex-1 min-h-0 overflow-y-scroll w-full"
     >
       <InputGroupTextarea
         value={syncedContent}

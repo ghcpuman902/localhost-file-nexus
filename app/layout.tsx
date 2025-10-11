@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
 import { SideInfoPanelWrapper } from "@/components/side-info-panel-wrapper";
 import { networkInterfaces } from "os";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -48,6 +49,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const ipAddress = getLocalIPAddresses();
+  const fileRoot = process.cwd();
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -59,7 +62,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SideInfoPanelWrapper ipAddress={ipAddress}>
+          <SideInfoPanelWrapper ipAddress={ipAddress} fileRoot={fileRoot}>
             {children}
           </SideInfoPanelWrapper>
           <Toaster expand={true} richColors />
