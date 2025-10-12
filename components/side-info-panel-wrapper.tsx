@@ -2,20 +2,14 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
-    Plus,
-    Search,
-    Clock,
     Star,
-    Trash2,
-    Settings,
     InfoIcon,
-    FileHeart,
     Heart,
     PanelRightClose
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "./ui/button";
 import { ThemeToggle } from "./ui/theme-toggle";
+import { SyncedTextarea } from "@/app/components/SyncedTextarea";
 export function SideInfoPanelWrapper({
     children,
     ipAddress,
@@ -47,9 +41,12 @@ export function SideInfoPanelWrapper({
                                 {ipAddress ? `http://${ipAddress}:3000` : 'localhost-file-nexus'}
                             </h1>
                             <p className="text-sm text-muted-foreground mt-2">
-                                From other devices:
+                            { ipAddress ? 
+                                `From other devices:
                                 ① Connect to the same network / wifi.
-                                ② Visit: http://{ipAddress ? ipAddress : 'localhost'}:3000
+                                ② Visit: http://${ipAddress}:3000`
+                                : `Can\'t find your ip address, are you connected to a network?`
+                            }
                             </p>
                         </Link>
                         <button
@@ -70,7 +67,16 @@ export function SideInfoPanelWrapper({
                         </button>
                     </header>
                     <div className="flex-1 min-h-0 overflow-auto p-4">
-                        {children}
+                        <div className="h-full flex flex-col lg:flex-row gap-12 lg:gap-8">
+                          <div className="flex-1 min-h-0 flex flex-col">
+                            <h2 className="text-2xl font-bold mb-4 shrink-0">File Exchange</h2>
+                            {children}
+                          </div>
+                          <div className="flex-1 min-h-0 flex flex-col">
+                            <h2 className="text-2xl font-bold mb-4 shrink-0">Shared Clipboard</h2>
+                            <SyncedTextarea />
+                          </div>
+                        </div>
                     </div>
                     <footer className="shrink-0 p-4 grid grid-cols-3 gap-4 border-t-2 pt-4 text-sm text-muted-foreground">
                         <div className="flex item-center justify-start">

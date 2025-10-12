@@ -11,6 +11,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { isImageFile, splitFilename, shouldShowFile, formatFileSize } from "@/lib/file-utils";
+import { cn } from "@/lib/utils";
 
 type UnifiedStatus = 'server' | 'idle' | 'uploading' | 'success' | 'error'
 
@@ -29,21 +30,43 @@ interface UnifiedItem {
 
 const generateItemKey = (name: string, size: number) => `${name}:${size}`
 
-const Breadcrumb = ({ fileRoot }: { fileRoot?: string }) => {
-  const uploadsPath = fileRoot ? `${fileRoot}/public/uploads` : 'public/uploads'
+const Breadcrumb = ({ fileRoot, currentPath }: { fileRoot?: string, currentPath?: string }) => {
+  const pathSegments = currentPath ? currentPath.split('/') : []
   
   return (
-    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 px-4 py-2 bg-muted/30 rounded-md">
-      <span className="font-medium text-foreground">{fileRoot || 'Repository Root'}</span>
-      <ChevronRight className="w-4 h-4" />
-      <span className="text-muted-foreground">public</span>
-      <ChevronRight className="w-4 h-4" />
-      <span className="text-muted-foreground">uploads</span>
+    <div className="border-t border-border px-3 py-2 bg-muted/30">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="font-medium text-foreground whitespace-nowrap">{fileRoot || 'Repository Root'}</span>
+        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <span className="text-muted-foreground whitespace-nowrap">public</span>
+        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        {currentPath ? (
+          <Link 
+            href="/browse" 
+            className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+          >
+            uploads
+          </Link>
+        ) : (
+          <span className="text-muted-foreground whitespace-nowrap">uploads</span>
+        )}
+        {pathSegments.map((segment, index) => (
+          <span key={index} className="flex items-center gap-2">
+            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <Link 
+              href={`/browse/${pathSegments.slice(0, index + 1).join('/')}`}
+              className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            >
+              {segment}
+            </Link>
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
 
-export function FileBrowser({ fileRoot }: { fileRoot?: string }) {
+export function FileBrowser({ fileRoot, currentPath }: { fileRoot?: string, currentPath?: string }) {
   const [itemsByKey, setItemsByKey] = useState<Map<string, UnifiedItem>>(new Map())
   const [error, setError] = useState<Error | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -52,13 +75,6 @@ export function FileBrowser({ fileRoot }: { fileRoot?: string }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const upsertItem = useCallback((item: UnifiedItem) => {
-    setItemsByKey(prev => {
-      const next = new Map(prev)
-      next.set(item.key, item)
-      return next
-    })
-  }, [])
 
   const markItem = useCallback((key: string, updates: Partial<UnifiedItem>) => {
     setItemsByKey(prev => {
@@ -72,8 +88,12 @@ export function FileBrowser({ fileRoot }: { fileRoot?: string }) {
 
   const refreshFiles = useCallback(async () => {
     try {
-      const response = await fetch('/api/files')
-      if (!response.ok) throw new Error('Failed to fetch files')
+      const url = currentPath ? `/api/files?path=${encodeURIComponent(currentPath)}` : '/api/files'
+      const response = await fetch(url)
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch files: ${response.status} ${errorText}`)
+      }
       const data = await response.json()
 
       setItemsByKey(prev => {
@@ -87,7 +107,7 @@ export function FileBrowser({ fileRoot }: { fileRoot?: string }) {
             name: f.name,
             size: f.size,
             isDirectory: f.isDirectory,
-            url: `/uploads/${f.name}`,
+            url: currentPath ? `/uploads/${currentPath}/${f.name}` : `/uploads/${f.name}`,
             status: 'server',
             addedAt: existing?.addedAt ?? Date.now()
           }
@@ -101,7 +121,7 @@ export function FileBrowser({ fileRoot }: { fileRoot?: string }) {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [currentPath])
 
   useEffect(() => {
     refreshFiles()
@@ -244,115 +264,122 @@ export function FileBrowser({ fileRoot }: { fileRoot?: string }) {
   }
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-scroll space-y-6">
-      <Breadcrumb fileRoot={fileRoot} />
-      <div
-        {...getRootProps()}
-        className={`relative bg-card rounded-lg shadow-sm overflow-hidden dark:border-1 dark:border-neutral-800 ${isDragActive ? 'ring-2 ring-primary/40 bg-muted/40' : ''}`}
-        aria-live="polite"
-        role="status"
-      >
-        <input {...getInputProps()} />
+    <div
+      {...getRootProps()}
+      className={`flex-1 min-h-0 overflow-y-auto relative bg-card rounded-lg shadow-sm overflow-hidden dark:border-1 dark:border-neutral-800 ${isDragActive ? 'ring-2 ring-primary/40 bg-muted/40' : ''}`}
+      aria-live="polite"
+      role="status"
+    >
+      <input {...getInputProps()} className="hidden" />
 
-        {hasPendings && (
-          <div className="sticky top-0 z-10 flex items-center justify-between gap-2 p-2 bg-card/90 backdrop-blur border-b">
-            <div className="text-sm text-muted-foreground">Pending files ready to upload</div>
+      {/* Unified Header - Add Files or Pending Files Controls */}
+      <div className="border-t border-border px-3 py-2 bg-muted/30">
+        {hasPendings ? (
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Upload className="w-4 h-4 text-muted-foreground" />
+              <span className={`font-medium text-foreground ${isUploading ? 'loading-text' : ''}`}>
+                {isUploading ? 'Uploading files...' : 'Pending files ready to upload'}
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleClearAll}
                 disabled={isUploading}
-                className="px-3 py-1 rounded-md bg-muted hover:bg-muted/80 disabled:opacity-50"
+                className="px-3 py-1 rounded-md bg-muted hover:bg-muted/80 disabled:opacity-50 text-sm"
               >
-                Clear all
+                Cancel
               </button>
               <button
                 onClick={handleUploadAll}
                 disabled={isUploading}
-                className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm"
               >
-                Upload all
+                Upload
               </button>
             </div>
           </div>
-        )}
-
-        {isLoading ? (
-          <div className="p-4 text-center">
-            <p>Loading files...</p>
-            <p className="text-sm text-muted-foreground mt-2">Scanning local upload directory</p>
-          </div>
-        ) : error ? (
-          <div className="p-4 text-destructive">
-            <h2 className="text-lg font-semibold mb-2">Error Loading Files</h2>
-            <p>Failed to read uploads directory. Please ensure the uploads folder exists and has proper permissions.</p>
-          </div>
         ) : (
-          <div className="divide-y divide-border">
-            <button
-              onClick={handleOpenPicker}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpenPicker() }}
-              tabIndex={0}
-              aria-label="Add files"
-              className="w-full flex items-center p-4 hover:bg-muted/50 transition-colors gap-4 text-left"
-            >
-              <span className="text-muted-foreground"><Upload className="w-4 h-4" /></span>
-              <div className="flex-1 truncate">Add files…</div>
-              <span className="text-sm text-muted-foreground whitespace-nowrap">Choose</span>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileInputChange}
-              aria-hidden="true"
-            />
-
-            {visibleItems.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
-                <p>No files yet</p>
-                <p className="text-sm mt-2">Use “Add files…” or drag and drop anywhere on this panel</p>
-              </div>
-            ) : (
-              visibleItems.map((item) => (
-                item.isDirectory ? (
-                  <Link
-                    key={item.key}
-                    href={`/browse/${item.name}`}
-                    className="flex items-center p-4 hover:bg-muted/50 transition-colors gap-4"
-                  >
-                    <span className="text-muted-foreground">
-                      <Folder className="w-4 h-4" />
-                    </span>
-                    <div className="flex-1 truncate">{item.name}</div>
-                  </Link>
-                ) : (
-                  <UnifiedFileItem
-                    key={item.key}
-                    item={item}
-                    onOpen={() => {
-                      if (item.status === 'server') setSelectedItem(item)
-                    }}
-                  />
-                )
-              ))
-            )}
-          </div>
+          <button
+            onClick={handleOpenPicker}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpenPicker() }}
+            tabIndex={0}
+            aria-label="Add files"
+            className="w-full flex items-center gap-2 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors"
+          >
+            <Upload className="w-4 h-4 text-muted-foreground" />
+            <span className="font-medium text-foreground">Add files…</span>
+            <span className="text-muted-foreground ml-auto">Choose</span>
+          </button>
         )}
-
-        {isDragActive && (
-          <div className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-primary-foreground">
-            <div className="px-3 py-1 rounded-md bg-primary/80">Drop files to add</div>
-          </div>
-        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={handleFileInputChange}
+          aria-hidden="true"
+        />
       </div>
+
+      {isLoading ? (
+        <div className="p-4 text-center">
+          <p>Loading files...</p>
+          <p className="text-sm text-muted-foreground mt-2">Scanning local upload directory</p>
+        </div>
+      ) : error ? (
+        <div className="p-4 text-destructive">
+          <h2 className="text-lg font-semibold mb-2">Error Loading Files</h2>
+          <p>Failed to read uploads directory. Please ensure the uploads folder exists and has proper permissions.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {visibleItems.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">
+              <p>No files yet</p>
+              <p className="text-sm mt-2">Use &quot;Add files…&quot; or drag and drop anywhere on this panel</p>
+            </div>
+          ) : (
+            visibleItems.map((item) => (
+              item.isDirectory ? (
+                <Link
+                  key={item.key}
+                  href={currentPath ? `/browse/${currentPath}/${item.name}` : `/browse/${item.name}`}
+                  className="w-full flex items-center p-4 hover:bg-muted/50 transition-colors gap-4 border-b border-border/50 last:border-b-0"
+                >
+                  <span className="text-muted-foreground">
+                    <Folder className="w-4 h-4" />
+                  </span>
+                  <div className="flex-1 truncate">{item.name}</div>
+                </Link>
+              ) : (
+                <UnifiedFileItem
+                  key={item.key}
+                  item={item}
+                  onOpen={() => {
+                    if (item.status === 'server') setSelectedItem(item)
+                  }}
+                />
+              )
+            ))
+          )}
+        </div>
+      )}
+
+      {isDragActive && (
+        <div className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-primary-foreground">
+          <div className="px-3 py-1 rounded-md bg-primary/80">Drop files to add</div>
+        </div>
+      )}
+
+      <Breadcrumb fileRoot={fileRoot} currentPath={currentPath} />
     </div>
   )
 }
 
 const UnifiedFileItem = ({ item, onOpen }: { item: UnifiedItem, onOpen: () => void }) => {
   const isPending = item.status !== 'server'
-  const className = `w-full flex items-center p-4 transition-colors gap-4 text-left ${isPending ? 'opacity-60' : 'hover:bg-muted/50'}`
+  const className = `w-full flex items-center p-4 transition-colors gap-4 text-left border-b border-border/50 last:border-b-0 ${isPending ? 'opacity-60' : 'hover:bg-muted/50'}`
 
   return (
     <button
@@ -412,12 +439,21 @@ const UnifiedFileItem = ({ item, onOpen }: { item: UnifiedItem, onOpen: () => vo
 
       <div className="flex items-center gap-3">
         {isPending && (
-          <span className="text-xs rounded-md px-2 py-0.5 bg-muted text-muted-foreground">
-            {item.status === 'idle' && 'Pending'}
-            {item.status === 'uploading' && 'Uploading'}
-            {item.status === 'success' && 'Uploaded'}
-            {item.status === 'error' && 'Error'}
-          </span>
+          <div className={cn(
+            "text-xs rounded-md px-2 py-0.5 bg-muted",
+          )}>
+            <span className={cn(
+              "dark:invert",
+              (item.status === 'idle' || item.status === 'uploading') && 'loading-text',
+              (item.status === 'success') && 'text-green-500',
+              (item.status === 'error') && 'text-red-500'
+            )}>
+              {item.status === 'idle' && 'Pending'}
+              {item.status === 'uploading' && 'Uploading'}
+              {item.status === 'success' && 'Success'}
+              {item.status === 'error' && 'Error'}
+            </span>
+          </div>
         )}
         <span className="text-sm text-muted-foreground whitespace-nowrap">
           {formatFileSize(item.size)}

@@ -131,4 +131,23 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .loading-text {
+    background: linear-gradient(110deg, #404040ff 35%, #ffffffff 50%, #404040ff 75%, #404040ff);
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: loading-text-gradient 2s linear infinite;
+  }
+  
+  @keyframes loading-text-gradient {
+    0% {
+      background-position: 200% 0;
+    }
+  
+    100% {
+      background-position: -200% 0;
+    }
+  }
 }

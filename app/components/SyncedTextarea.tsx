@@ -3,14 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Copy, FileDiff, CheckCircle } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
+import { cn } from "@/lib/utils"
 
 export function SyncedTextarea() {
   const [syncedContent, setSyncedContent] = useState("")
@@ -82,6 +81,12 @@ export function SyncedTextarea() {
     const eventSource = new EventSource("/api/sync")
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data)
+      
+      // Handle heartbeat messages
+      if (data.type === 'heartbeat') {
+        return // Ignore heartbeat messages
+      }
+      
       setInitialContent(false)
       // If the server sends an empty content while we already have nonempty persisted text, ignore it.
       if (data.content === "" && syncedContentRef.current !== "") {
@@ -211,12 +216,12 @@ export function SyncedTextarea() {
 
   return (
     <InputGroup
-      className="flex-1 min-h-0 overflow-y-scroll w-full"
+      className="flex-1 min-h-0 overflow-y-auto w-full"
     >
       <InputGroupTextarea
         value={syncedContent}
         onChange={(e) => handleSync(e.target.value)}
-        className="w-full min-h-[20lh] text-sm"
+        className="w-full min-h-[20lh] text-sm bg-transparent dark:bg-neutral-900"
         placeholder="Paste terminal outputs, commands, or any text here to sync across devices..."
       />
       <InputGroupAddon align="block-end">
@@ -224,18 +229,24 @@ export function SyncedTextarea() {
           onClick={handleCopy}
           variant="outline"
           title="Copy entire content"
-          className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 1 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
+          className="px-1"
         >
-          {copyStatus === 1 ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          <div className="relative size-4">
+            <CheckCircle className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 1 ? 'opacity-100' : 'opacity-0 blur-xs')} />
+            <Copy className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 1 ? 'opacity-0 blur-xs' : 'opacity-100')} />
+          </div>
           Copy All
         </InputGroupButton>
         <InputGroupButton
           onClick={handleCopyDiff}
           variant="outline"
           title="Copy only the latest changes"
-          className={`transition-all duration-100 bg-linear-to-r/increasing  ${copyStatus === 2 ? 'from-purple-600 to-amber-600 text-white hover:text-white' : ''}`} // Use Tailwind for rainbow effect
+          className="px-1"
         >
-          {copyStatus === 2 ? <CheckCircle className="h-4 w-4" /> : <FileDiff className="h-4 w-4" />}
+          <div className="relative size-4">
+            <CheckCircle className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 2 ? 'opacity-100' : 'opacity-0 blur-xs')} />
+            <FileDiff className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 2 ? 'opacity-0 blur-xs' : 'opacity-100')} />
+          </div>
           Copy Diff
         </InputGroupButton>
       </InputGroupAddon>

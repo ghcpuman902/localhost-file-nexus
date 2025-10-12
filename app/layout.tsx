@@ -39,7 +39,7 @@ const getLocalIPAddresses = () => {
   }
 
   // Return the first found non-internal IPv4 address
-  return results[Object.keys(results)[0]]?.[0] || 'No IP found';
+  return results[Object.keys(results)[0]]?.[0] || undefined;
 };
 
 
