@@ -266,16 +266,16 @@ export function FileBrowser({ fileRoot, currentPath }: { fileRoot?: string, curr
   return (
     <div
       {...getRootProps()}
-      className={`flex-1 min-h-0 overflow-y-auto relative bg-card rounded-lg shadow-sm overflow-hidden dark:border-1 dark:border-neutral-800 ${isDragActive ? 'ring-2 ring-primary/40 bg-muted/40' : ''}`}
+      className={`relative w-full h-full bg-background rounded-lg border border-input ${isDragActive ? 'ring-2 ring-primary/40 bg-muted/40' : ''}`}
       aria-live="polite"
       role="status"
     >
       <input {...getInputProps()} className="hidden" />
 
       {/* Unified Header - Add Files or Pending Files Controls */}
-      <div className="border-t border-border px-3 py-2 bg-muted/30">
+      <div className="px-3 py-2 bg-muted/30 rounded-t-lg">
         {hasPendings ? (
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 p-1">
             <div className="flex items-center gap-2 text-sm">
               <Upload className="w-4 h-4 text-muted-foreground" />
               <span className={`font-medium text-foreground ${isUploading ? 'loading-text' : ''}`}>
@@ -286,14 +286,14 @@ export function FileBrowser({ fileRoot, currentPath }: { fileRoot?: string, curr
               <button
                 onClick={handleClearAll}
                 disabled={isUploading}
-                className="px-3 py-1 rounded-md bg-muted hover:bg-muted/80 disabled:opacity-50 text-sm"
+                className="px-3 py-1 rounded-md bg-background/95 backdrop-blur-sm border border-input shadow-sm hover:bg-muted/80 disabled:opacity-50 text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUploadAll}
                 disabled={isUploading}
-                className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm"
+                className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm shadow-sm"
               >
                 Upload
               </button>
@@ -305,7 +305,7 @@ export function FileBrowser({ fileRoot, currentPath }: { fileRoot?: string, curr
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpenPicker() }}
             tabIndex={0}
             aria-label="Add files"
-            className="w-full flex items-center gap-2 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors"
+            className="w-full flex items-center gap-2 text-sm p-1"
           >
             <Upload className="w-4 h-4 text-muted-foreground" />
             <span className="font-medium text-foreground">Add files…</span>
@@ -384,7 +384,7 @@ const UnifiedFileItem = ({ item, onOpen }: { item: UnifiedItem, onOpen: () => vo
   return (
     <button
       onClick={() => { if (!isPending) onOpen() }}
-      className={className}
+      className={cn(className, isPending && 'loading-text')}
       tabIndex={0}
       aria-label={isPending ? `${item.name} pending` : `Open ${item.name}`}
       onKeyDown={(e) => { if (!isPending && (e.key === 'Enter' || e.key === ' ')) onOpen() }}

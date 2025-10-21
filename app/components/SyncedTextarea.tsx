@@ -3,12 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Copy, FileDiff, CheckCircle } from "lucide-react"
 import { toast } from "sonner"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 export function SyncedTextarea() {
@@ -215,41 +210,44 @@ export function SyncedTextarea() {
   }
 
   return (
-    <InputGroup
-      className="flex-1 min-h-0 overflow-y-auto w-full"
-    >
-      <InputGroupTextarea
+    <div className="relative w-full h-full">
+      {/* Fixed-size textarea container */}
+      <textarea
         value={syncedContent}
         onChange={(e) => handleSync(e.target.value)}
-        className="w-full min-h-[20lh] text-sm bg-transparent dark:bg-neutral-900"
+        className="w-full h-[calc(100%)] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         placeholder="Paste terminal outputs, commands, or any text here to sync across devices..."
       />
-      <InputGroupAddon align="block-end">
-        <InputGroupButton
+      
+      {/* Absolutely positioned addon buttons */}
+      <div className="absolute bottom-2 right-2 flex gap-1">
+        <Button
           onClick={handleCopy}
           variant="outline"
+          size="sm"
           title="Copy entire content"
-          className="px-1"
+          className="h-8 px-2 text-xs bg-background/95 backdrop-blur-sm border shadow-sm"
         >
           <div className="relative size-4">
             <CheckCircle className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 1 ? 'opacity-100' : 'opacity-0 blur-xs')} />
             <Copy className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 1 ? 'opacity-0 blur-xs' : 'opacity-100')} />
           </div>
           Copy All
-        </InputGroupButton>
-        <InputGroupButton
+        </Button>
+        <Button
           onClick={handleCopyDiff}
           variant="outline"
+          size="sm"
           title="Copy only the latest changes"
-          className="px-1"
+          className="h-8 px-2 text-xs bg-background/95 backdrop-blur-sm border shadow-sm"
         >
           <div className="relative size-4">
             <CheckCircle className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 2 ? 'opacity-100' : 'opacity-0 blur-xs')} />
             <FileDiff className={cn("size-4 absolute inset-0 transition-all duration-100", copyStatus === 2 ? 'opacity-0 blur-xs' : 'opacity-100')} />
           </div>
           Copy Diff
-        </InputGroupButton>
-      </InputGroupAddon>
-    </InputGroup>
+        </Button>
+      </div>
+    </div>
   )
 } 

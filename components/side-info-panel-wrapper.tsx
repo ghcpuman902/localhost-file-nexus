@@ -13,10 +13,12 @@ import { SyncedTextarea } from "@/app/components/SyncedTextarea";
 export function SideInfoPanelWrapper({
     children,
     ipAddress,
+    ipPort=3000,
     fileRoot
 }: {
     children: React.ReactNode;
     ipAddress?: string;
+    ipPort?: number;
     fileRoot?: string;
 }) {
     const [isSidebarClosed, setIsSidebarClosed] = useState(false);
@@ -34,23 +36,23 @@ export function SideInfoPanelWrapper({
     return (
         <main className="relative flex h-dvh w-dvw overflow-hidden group flex-1 flex-row gap-0">
             <div className="h-full w-full p-4 overflow-hidden">
-                <div className="bg-foreground/5 rounded-3xl h-full w-full overflow-hidden flex flex-col">
-                    <header className="flex flex-row justify-between items-start">
-                        <Link href="/" className="p-4">
+                <div className="bg-foreground/5 rounded-3xl h-full w-full grid grid-cols-2 grid-rows-[auto_1fr_auto] p-2">
+                    <header className="col-span-2 row-span-1 flex flex-row justify-between items-start">
+                        <Link href="/" className="p-2">
                             <h1 className="scroll-m-20 text-2xl md:text-4xl lg:text-5xl flex items-center gap-2">
-                                {ipAddress ? `http://${ipAddress}:3000` : 'localhost-file-nexus'}
+                                {ipAddress ? `http://${ipAddress}:${ipPort}` : 'localhost-file-nexus'}
                             </h1>
                             <p className="text-sm text-muted-foreground mt-2">
                             { ipAddress ? 
                                 `From other devices:
                                 ① Connect to the same network / wifi.
-                                ② Visit: http://${ipAddress}:3000`
+                                ② Visit: http://${ipAddress}:${ipPort}`
                                 : `Can\'t find your ip address, are you connected to a network?`
                             }
                             </p>
                         </Link>
                         <button
-                            className="sidebar-icon-trigger size-16 hover:bg-button-hover p-3 flex items-start justify-end"
+                            className="sidebar-icon-trigger size-16 hover:bg-button-hover p-1 flex items-start justify-end"
                             onClick={handleToggle}
                         >
                             {/* positioning div */}
@@ -66,19 +68,15 @@ export function SideInfoPanelWrapper({
                             </div>
                         </button>
                     </header>
-                    <div className="flex-1 min-h-0 overflow-auto p-4">
-                        <div className="h-full flex flex-col lg:flex-row gap-12 lg:gap-8">
-                          <div className="flex-1 min-h-0 flex flex-col">
-                            <h2 className="text-2xl font-bold mb-4 shrink-0">File Exchange</h2>
+                    <div className="row-span-1 col-span-2 grid grid-cols-subgrid grid-rows-subgrid">
+                        <div className="col-span-1 row-span-1 overflow-hidden p-2">
                             {children}
-                          </div>
-                          <div className="flex-1 min-h-0 flex flex-col">
-                            <h2 className="text-2xl font-bold mb-4 shrink-0">Shared Clipboard</h2>
+                        </div>
+                        <div className="col-span-1 row-span-1 overflow-hidden p-2">
                             <SyncedTextarea />
-                          </div>
                         </div>
                     </div>
-                    <footer className="shrink-0 p-4 grid grid-cols-3 gap-4 border-t-2 pt-4 text-sm text-muted-foreground">
+                    <footer className="col-span-2 row-span-1 grid grid-cols-3 gap-4 border-t-2 p-2 pt-4 mt-2 text-sm text-muted-foreground">
                         <div className="flex item-center justify-start">
                             <Link
                                 className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -147,7 +145,7 @@ export function SideInfoPanelWrapper({
                                 <h4 className="text-sm font-medium mb-2">Access from Other Devices</h4>
                                 <div className="text-xs text-muted-foreground space-y-1">
                                     <p>① Connect to the same network / wifi</p>
-                                    <p>② Visit: <code className="bg-muted px-1 rounded">http://{ipAddress || 'localhost'}:3000</code></p>
+                                    <p>② Visit: <code className="bg-muted px-1 rounded">http://{ipAddress || 'localhost'}:${ipPort}</code></p>
                                 </div>
                             </div>
                         </div>

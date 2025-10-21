@@ -22,9 +22,10 @@ export const metadata: Metadata = {
 };
 
 
-const getLocalIPAddresses = () => {
+const getLocalIPAddressesAndPort = () => {
   const nets = networkInterfaces();
-  const results: { [key: string]: string[] } = Object.create(null);
+
+  const results: { [key: string]: { ipAddress: string, port: number }[] } = Object.create(null);
 
   for (const name of Object.keys(nets)) {
     for (const net of nets[name] || []) {
@@ -33,13 +34,13 @@ const getLocalIPAddresses = () => {
         if (!results[name]) {
           results[name] = [];
         }
-        results[name].push(net.address);
+        results[name].push({ ipAddress: net.address, port: process.env.PORT ? parseInt(process.env.PORT) : 3000 });
       }
     }
   }
 
   // Return the first found non-internal IPv4 address
-  return results[Object.keys(results)[0]]?.[0] || undefined;
+  return results[Object.keys(results)[0]]?.[0] || { ipAddress: undefined, port: undefined };
 };
 
 
@@ -48,7 +49,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const ipAddress = getLocalIPAddresses();
+  const { ipAddress, port } = getLocalIPAddressesAndPort();
   const fileRoot = process.cwd();
   
   return (
@@ -62,7 +63,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SideInfoPanelWrapper ipAddress={ipAddress} fileRoot={fileRoot}>
+          <SideInfoPanelWrapper ipAddress={ipAddress} ipPort={port} fileRoot={fileRoot}>
             {children}
           </SideInfoPanelWrapper>
           <Toaster expand={true} richColors />
